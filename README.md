@@ -8,7 +8,7 @@
 
 这个仓库主要包含了基于深度学习的癌症检测的源代码框架，开发用于从全幻灯片癌症病理图像（WSI）中识别癌转移。该框架成功应用于Camelyon‘16 grand challenge的数据集。我开发本项目主要是提供一个关于WSI检测的解决方案，以及超简优化代码，并没有在性能上做出较多的探索。
 
-![](https://github.com/ilikewind/blob/master/docs/test_own.jpg)
+![](https://github.com/ilikewind/CAMELYON16/blob/master/docs/test_own.jpg)
 
 ## Notes
 
@@ -137,7 +137,7 @@ python CAMELYON16/camelyon16/bin/probs_map.py /WSI_PATH/Test_001.tif /CKPT_PATH/
 
 利用该模型生成癌区域热力图谱，如下所示：
 
-![](https://github.com/ilikewind/CAMELYON16/blob/master/docs/heatmap.jpg)
+![](https://github.com/ilikewind/CAMELYON16/blob/master/docs/heatmap.png)
 
 ### 肿瘤定位 (Tumor localization)
 
