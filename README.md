@@ -34,7 +34,7 @@
 
 数据主要是来自[Camelyon16](https://camelyon16.grand-challenge.org/)挑战赛的*.tif格式的全幻灯片图像 (WSI)。您可以在[Camelyon16](https://camelyon16.grand-challenge.org/)上下载免费数据，不过建议您应当在获得官方批准之后再使用该数据。注意，一张全幻灯片图像通常在0级为~100k×100k像素，在磁盘上有1GB+的储存量。比赛数据一共有700张WSI，总计约700GB+数据，所以要确保有足够的磁盘空间。用于训练的肿瘤WSI命名为Tumor\_×××.tif，其中xxx的范围是001到110。用于训练的正常WSI名为Normal\_xxx.tif，其中xxx的范围是从001到160。用于测试的WSI名为Test\_xxx.tif，其中xxx的范围从001到130。
 
-![](https://github.com/ilikewind/blob/master/docs/datavisul.png)
+![](https://github.com/ilikewind/CAMELYON16/blob/master/docs/datavisul.png)
 
 ### 标注 (Annotations)
 
@@ -69,7 +69,7 @@ python CAMELYON16/camelyon16/bin/camelyon16xml2json.py Tumor_001.xml Tumor_001.j
 
 ## 模型 (Model)
 
-![](https://github.com/ilikewind/blob/master/docs/framework.png)
+![](https://github.com/ilikewind/CAMELYON16/blob/master/docs/framework.png)
 
 框架主要包含两部分，一是基于CNN的补丁图像分类（肿瘤定位），另外一个是基于机器学习，比如SVM, 贝叶斯分类器等算法的WSI分类。本部分讲解概述性内容，具体问题请参考代码。
 
@@ -119,11 +119,11 @@ python CAMELYON16/camelyon16/bin/wsi_classification.py probs_map_features_train.
 
 经过训练的模型对WSI分析的主要测试结果是表示模型认为WSI上的肿瘤区域的概率图。当然，我们可以使用一种滑动窗口的方式来预测所有补丁为肿瘤的概率。**但是由于WSI的大部分实际上是白色背景区域，所以这种滑动窗口的方式浪费了大量的计算**。取而代之的是，我们首先计算一个二元组织掩模，表示每个patch是组织或背景，然后只对组织区域进行肿瘤预测。如下所示
 
-![](https://github.com/ilikewind/blob/master/docs/tissue_mask_wsi.png)
+![](https://github.com/ilikewind/CAMELYON16/blob/master/docs/tissue_mask_wsi.png)
 
 获取给定输入WSI的组织掩码图像，请使用下面的命令行
 
-```shel
+```shell
 python CAMELYON16/camelyon16/bin/tissue_mask.py Tumor_001.tif Tumor_001_tissue.npy 6
 ```
 
@@ -137,7 +137,7 @@ python CAMELYON16/camelyon16/bin/probs_map.py /WSI_PATH/Test_001.tif /CKPT_PATH/
 
 利用该模型生成癌区域热力图谱，如下所示：
 
-![](https://github.com/ilikewind/blob/master/docs/heatmap.jpg)
+![](https://github.com/ilikewind/CAMELYON16/blob/master/docs/heatmap.jpg)
 
 ### 肿瘤定位 (Tumor localization)
 
