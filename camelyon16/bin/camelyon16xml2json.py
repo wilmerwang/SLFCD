@@ -5,7 +5,7 @@ import logging
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../../')
 
-from nnxgb.data.annotation import Formatter  # noqa
+from camelyon16.data.annotation import Formatter  # noqa
 
 parser = argparse.ArgumentParser(description='Convert Camelyon16 xml format to'
                                  'internal json format')

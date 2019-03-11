@@ -58,11 +58,13 @@ def run(args):
     with open(txt_path, "a") as f:
         np.savetxt(f, center_points, fmt="%s", delimiter=",")
 
+
 def main():
     logging.basicConfig(level=logging.INFO)
 
     args = parser.parse_args()
     run(args)
+
 
 if __name__ == "__main__":
     main()

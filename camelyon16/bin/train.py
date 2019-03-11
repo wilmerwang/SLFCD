@@ -11,12 +11,13 @@ from torch.autograd import Variable
 from torch.nn import BCEWithLogitsLoss, DataParallel
 from torch.optim import SGD
 from torchvision import models
-from torchvision.datasets import ImageFolder
+from torch import nn
 
 from tensorboardX import SummaryWriter
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
 
+from camelyon16.data.image_producer import ImageDataset
 torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)
 
@@ -33,6 +34,14 @@ parser.add_argument('--device_ids', default='0', type=str, help='comma'
                     ' and GPU_1, default 0.')
 
 
+def chose_model(cnn):
+    if cnn['model'] == 'resnet18':
+        model = models.resnet18(pretrained=False)
+    else:
+        raise Exception("I have not add any models. ")
+    return model
+
+
 def train_epoch(summary, summary_writer, cnn, model, loss_fn, optimizer,
                 dataloader_train):
     model.train()
@@ -44,10 +53,11 @@ def train_epoch(summary, summary_writer, cnn, model, loss_fn, optimizer,
     time_now = time.time()
     for step in range(steps):
         data_train, target_train = next(dataiter_train)
-        data_train = Variable(data_train.cuda(async=True))
-        target_train = Variable(target_train.cuda(async=True))
+        data_train = Variable(data_train.float().cuda(async=True))
+        target_train = Variable(target_train.float().cuda(async=True))
 
         output = model(data_train)
+        output = torch.squeeze(output) # noqa
         loss = loss_fn(output, target_train)
 
         optimizer.zero_grad()
@@ -56,9 +66,10 @@ def train_epoch(summary, summary_writer, cnn, model, loss_fn, optimizer,
 
         probs = output.sigmoid()
         predicts = (probs >= 0.5).type(torch.cuda.FloatTensor)
+
         acc_data = (predicts == target_train).type(
-            torch.cuda.FloatTensor).sum().data[0] * 1.0 / batch_size
-        loss_data = loss.data[0]
+            torch.cuda.FloatTensor).sum().data * 1.0 / batch_size
+        loss_data = loss.data
 
         time_spent = time.time() - time_now
         logging.info(
@@ -74,9 +85,9 @@ def train_epoch(summary, summary_writer, cnn, model, loss_fn, optimizer,
             summary_writer.add_scalar('train/loss', loss_data, summary['step'])
             summary_writer.add_scalar('train/acc', acc_data, summary['step'])
 
-        summary['step'] += 1
+    summary['epoch'] += 1
 
-        return summary
+    return summary
 
 
 def valid_epoch(summary, model, loss_fn,
@@ -91,20 +102,21 @@ def valid_epoch(summary, model, loss_fn,
     acc_sum = 0
     for step in range(steps):
         data_valid, target_valid = next(dataiter_valid)
-        data_valid = Variable(data_valid.cuda(async=True), volatile=True)
-        target_valid = Variable(target_valid.cuda(async=True))
+        data_valid = Variable(data_valid.float().cuda(async=True), volatile=True)
+        target_valid = Variable(target_valid.float().cuda(async=True))
 
         output = model(data_valid)
+        output = torch.squeeze(output) # important
         loss = loss_fn(output, target_valid)
 
         probs = output.sigmoid()
         predicts = (probs >= 0.5).type(torch.cuda.FloatTensor)
-        acc_data = (predicts == target_valid).tpye(
-            torch.cuda.FloatTensor).sum().data[0] * 1.0 / batch_size
-        loss_data = loss.data[0]
+        acc_data = (predicts == target_valid).type(
+            torch.cuda.FloatTensor).sum().data * 1.0 / batch_size
+        loss_data = loss.data
 
         loss_sum += loss_data
-        acc_sum += loss_data
+        acc_sum += acc_data
 
     summary['loss'] = loss_sum / steps
     summary['acc'] = acc_sum / steps
@@ -113,7 +125,7 @@ def valid_epoch(summary, model, loss_fn,
 
 
 def run(args):
-    with open(args.cnn_path) as f:
+    with open(args.cnn_path, 'r') as f:
         cnn = json.load(f)
 
     if not os.path.exists(args.save_path):
@@ -128,14 +140,24 @@ def run(args):
     batch_size_valid = cnn['batch_size'] * num_GPU
     num_workers = args.num_workers * num_GPU
 
-    model = models.cnn['model'](pretrained=True)
+    model = chose_model(cnn)
+    fc_features = model.fc.in_features
+    model.fc = nn.Linear(fc_features, 1) # 须知
     model = DataParallel(model, device_ids=None)
     model = model.cuda()
     loss_fn = BCEWithLogitsLoss().cuda()
-    optimizer = SGD(model.parameters(), lr=cnn['lf'], momentum=cnn['momentum'])
+    optimizer = SGD(model.parameters(), lr=cnn['lr'], momentum=cnn['momentum'])
 
-    dataset_train = ImageFolder(cnn['data_path_train'])
-    dataset_valid = ImageFolder(cnn['data_path_valid'])
+    # dataset_train = ImageFolder(cnn['data_path_train'])
+    # dataset_valid = ImageFolder(cnn['data_path_valid'])
+    dataset_train = ImageDataset(cnn['data_path_train'],
+                                 cnn['image_size'],
+                                 cnn['crop_size'],
+                                 cnn['normalize'])
+    dataset_valid = ImageDataset(cnn['data_path_valid'],
+                                 cnn['image_size'],
+                                 cnn['crop_size'],
+                                 cnn['normalize'])
 
     dataloader_train = DataLoader(dataset_train,
                                   batch_size=batch_size_train,
@@ -145,9 +167,9 @@ def run(args):
                                   num_workers=num_workers)
 
     summary_train = {'epoch': 0, 'step': 0}
-    summary_valid = {'loss': float('int'), 'acc': 0}
+    summary_valid = {'loss': float('inf'), 'acc': 0}
     summary_writer = SummaryWriter(args.save_path)
-    loss_valid_best = float('int')
+    loss_valid_best = float('inf')
     for epoch in range(cnn['epoch']):
         summary_train = train_epoch(summary_train, summary_writer, cnn, model,
                                     loss_fn, optimizer,
@@ -170,7 +192,7 @@ def run(args):
                              summary_valid['acc'], time_spent))
 
         summary_writer.add_scalar('valid/loss',
-                                  summary_valid['loss'],summary_train['step'])
+                                  summary_valid['loss'], summary_train['step'])
         summary_writer.add_scalar('valid/acc',
                                   summary_valid['acc'], summary_train['step'])
 

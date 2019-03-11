@@ -4,7 +4,7 @@ import logging
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
 
-from nnxgb.data.annotation import Formatter # noqa
+from camelyon16.data.annotation import Formatter # noqa
 
 parser = argparse.ArgumentParser(description='Convert My json format to'
                                              'ASAP json format')
@@ -14,6 +14,7 @@ parser.add_argument('xml_path', default=None, metavar='XML_PATH', type=str,
                     help='Path to the output ASAP xml annotation')
 parser.add_argument('color', default=None, metavar='COLOR', nargs='+', type=str,
                     help='The polygon part of color')
+
 
 def run(args):
     with open(args.json_path) as f:

@@ -9,7 +9,7 @@ import cv2
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__) + '/../../'))
 
-from data.probs_ops import extract_features
+from camelyon16.data.probs_ops import extractor_features
 
 parser = argparse.ArgumentParser(description='Extract features from probability map'
                                              'for slide classification')
@@ -34,6 +34,7 @@ def compute_features(extractor):
 
     probs_map_threshold_p90 = extractor.probs_map_set_p(0.9)
     probs_map_threshold_p50 = extractor.probs_map_set_p(0.5)
+
     region_props_p90 = extractor.get_region_props(probs_map_threshold_p90)
     region_props_p50 = extractor.get_region_props(probs_map_threshold_p50)
 
@@ -44,7 +45,7 @@ def compute_features(extractor):
     features.append(f_percentage_tumor_over_tissue_region)
 
     largest_tumor_region_index_t50 = extractor.get_largest_tumor_index(region_props_p50)
-    f_area_largest_tumor_region_t50 = extractor.region_props_t50[largest_tumor_region_index_t50].area  # 3
+    f_area_largest_tumor_region_t50 = region_props_p50[largest_tumor_region_index_t50].area  # 3
     features.append(f_area_largest_tumor_region_t50)
 
     f_longest_axis_largest_tumor_region_t50 = extractor.get_longest_axis_in_largest_tumor_region(region_props_p50,
@@ -76,11 +77,11 @@ def compute_features(extractor):
 
 
 def run(args):
-    slide = openslide.OpenSlide(args.wsi_path)
+    slide_path = args.wsi_path
 
     probs_map = np.load(args.probs_map_path)
 
-    extractor = extract_features(probs_map, slide)
+    extractor = extractor_features(probs_map, slide_path)
 
     features = compute_features(extractor)
 

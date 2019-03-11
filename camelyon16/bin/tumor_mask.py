@@ -18,7 +18,7 @@ parser.add_argument('json_path', default=None, metavar='JSON_PATH', type=str,
                     help='Path to the JSON file')
 parser.add_argument('npy_path', default=None, metavar='NPY_PATH', type=str,
                     help='Path to the output npy mask file')
-parser.add_argument('--level', default=2, type=int, help='at which WSI level'
+parser.add_argument('--level', default=6, type=int, help='at which WSI level'
                     ' to obtain the mask, default 6')
 
 

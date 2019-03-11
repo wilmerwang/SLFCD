@@ -11,6 +11,7 @@ import torch
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from torchvision import models
+from torch import nn
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
 
@@ -40,6 +41,14 @@ parser.add_argument('--num_workers', default=5, type=int, help='number of '
 parser.add_argument('--eight_avg', default=0, type=int, help='if using average'
                     ' of the 8 direction predictions for each patch,'
                     ' default 0, which means disabled')
+
+
+def chose_model(mod):
+    if mod == 'resnet18':
+        model = models.resnet18(pretrained=False)
+    else:
+        raise Exception("I have not add any models. ")
+    return model
 
 
 def get_probs_map(model, dataloader):
@@ -96,7 +105,9 @@ def run(args):
 
     mask = np.load(args.mask_path)
     ckpt = torch.load(args.ckpt_path)
-    model = models[cnn['model']]()
+    model = chose_model(cnn['model'])
+    fc_features = model.fc.in_features
+    model.fc = nn.Linear(fc_features, 1)
     model.load_state_dict(ckpt['state_dict'])
     model = model.cuda().eval()
 
