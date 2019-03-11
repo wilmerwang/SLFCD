@@ -3,6 +3,7 @@
 > Supervised Learning Framework for Cancer Detection.
 >
 > 基于监督学习的癌症检测框架 , 该框架在根据全幻灯片癌症病理图像（Whole slide images, WSI）作为输入数据，实现了癌区域定位，以及基于WSI的图像分类。
+> 如果本项目对您有所帮助，请给课star. ^.^
 
 ## 基本概述
 
@@ -13,12 +14,8 @@
 ## Notes
 
 - [x] **extras/CNNRF 是使用keras进行建模的相近项目**
-- [ ] train.py
-- [ ] probs_map.py
-- [ ] nms.py
-- [ ] Evalution_FROC.py
-- [ ] extract_feature_probsmap.py
-- [ ] wsi_classification.py
+- [ ] Debug camelyon16
+- [ ] Debug extras/CNNRF
 
 ## Requisetes
 
@@ -59,10 +56,10 @@ python CAMELYON16/camelyon16/bin/camelyon16xml2json.py Tumor_001.xml Tumor_001.j
 5. 获取补丁数据集
 
    ```python
-   python CAMELYON16/camelyon16/bin/patch_gen.py /WSI_TRAIN/ NCRF/coords/tumor_train.txt /PATCHES_TUMOR_TRAIN/
-   python CAMELYON16/camelyon16/bin/patch_gen.py /WSI_TRAIN/ NCRF/coords/normal_train.txt /PATCHES_NORMAL_TRAIN/
-   python CAMELYON16/camelyon16/bin/patch_gen.py /WSI_TRAIN/ NCRF/coords/tumor_valid.txt /PATCHES_TUMOR_VALID/
-   python CAMELYON16/camelyon16/bin/patch_gen.py /WSI_TRAIN/ NCRF/coords/normal_valid.txt /PATCHES_NORMAL_VALID/
+   python CAMELYON16/camelyon16/bin/patch_gen.py /WSI_TRAIN/ tumor_train.txt /PATCHES_TUMOR_TRAIN/
+   python CAMELYON16/camelyon16/bin/patch_gen.py /WSI_TRAIN/ normal_train.txt /PATCHES_NORMAL_TRAIN/
+   python CAMELYON16/camelyon16/bin/patch_gen.py /WSI_TRAIN/ umor_valid.txt /PATCHES_TUMOR_VALID/
+   python CAMELYON16/camelyon16/bin/patch_gen.py /WSI_TRAIN/ normal_valid.txt /PATCHES_NORMAL_VALID/
    ```
 
    其中```/WSI_TRAIN/```是存放所有用于训练的WSI文件目录路径，``/PATCHES_TUMOR_TRAIN/``是存储生成的用于培训的肿瘤补丁的目录的路径。同样的命名也适用于``/PATCHES_NORMAL_TRAIN/``、``/PATCHES_TUMOR_VALID/``和``/PATCHES_NORMAL_VALID/``。
