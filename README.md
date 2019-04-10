@@ -15,8 +15,8 @@
 
 - [x] extras/CNNRF 是使用keras训练的相近项目
 - [x] Debug camelyon16
-    - [] extract\_feature\_probsmap.py
-    - [] wsi_classification.py
+    - [ ] extract\_feature\_probsmap.py
+    - [ ] wsi_classification.py
 - [ ] Debug extras/CNNRF
 
 ## Requisetes
