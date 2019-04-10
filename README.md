@@ -1,9 +1,6 @@
 # SLFCD
 
-> Supervised Learning Framework for Cancer Detection.
->
-> 基于监督学习的癌症检测框架 , 该框架在根据全幻灯片癌症病理图像（Whole slide images, WSI）作为输入数据，实现了癌区域定位，以及基于WSI的图像分类。
-> 如果本项目对您有所帮助，请给课star. ^.^
+> ar. ^.^
 
 ## 基本概述
 
