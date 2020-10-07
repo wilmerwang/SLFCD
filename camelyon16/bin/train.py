@@ -199,10 +199,10 @@ def run(args):
         if summary_valid['loss'] < loss_valid_best:
             loss_valid_best = summary_valid['loss']
 
-        torch.save({'epoch': summary_train['epoch'],
-                    'step': summary_train['step'],
-                    'state_dict': model.module.state_dict()},
-                   os.path.join(args.save_path, 'best.ckpt'))
+            torch.save({'epoch': summary_train['epoch'],
+                        'step': summary_train['step'],
+                        'state_dict': model.module.state_dict()},
+                       os.path.join(args.save_path, 'best.ckpt'))
 
     summary_writer.close()
 
